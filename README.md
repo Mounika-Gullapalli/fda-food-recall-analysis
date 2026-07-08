@@ -11,6 +11,14 @@ as an interactive Power BI dashboard.
 Which food product categories, causes, companies, and states are associated with the most
 FDA recalls, and what severity patterns exist?
 
+## Target Audience
+This dashboard is designed for:
+- **Consumers and food safety advocates** wanting to understand which product categories
+  and hazards carry the highest recall risk
+- **Retailers and grocery buyers** assessing supplier/category risk concentration
+- **Public health and regulatory analysts** looking for geographic or seasonal recall
+  patterns to inform inspection or outreach priorities
+
 ## Dataset Information
 Data was pulled directly from the U.S. FDA's official openFDA API — the Food Enforcement
 endpoint: https://api.fda.gov/food/enforcement.json
@@ -71,11 +79,13 @@ Class I Recalls = CALCULATE([Total Recalls], 'enforcement'[results.classificatio
 % Class I = DIVIDE([Class I Recalls], [Total Recalls])
 
 RecallReasonCategory = SWITCH(TRUE(), ... )   -- keyword-based categorization, see notebook/DAX for full logic
-
-FirmNameShort = IF(LEN('enforcement'[results.recalling_firm]) > 18,
-                    LEFT('enforcement'[results.recalling_firm], 18) & "...",
-                    'enforcement'[results.recalling_firm])
 ```
+
+## Note on Partial 2026 Data
+The trend chart's final data point (2026) reflects a **partial year only** — the dataset
+was pulled mid-2026, so this year's total will appear lower than a complete year even if
+the underlying recall rate is unchanged. This should not be read as a declining trend; it's
+a data cutoff artifact, not a real pattern. (See also: Limitations, below.)
 
 ## Dashboard
 ![Dashboard Overview](output/dashboard_overview.png)
@@ -109,6 +119,16 @@ FirmNameShort = IF(LEN('enforcement'[results.recalling_firm]) > 18,
 5. `event_id` duplication means recall *event* counts (723) differ from recall *record*
    counts (988) — all figures in this analysis are at the record (product) level unless
    otherwise stated.
+
+## Learnings & Reflection
+This project reinforced that data cleaning decisions — like how to treat duplicate event
+IDs or free-text categorization — need to be made deliberately and documented, not just
+"fixed" silently. The recall-reason categorization step in particular showed how much
+judgment goes into turning unstructured text into usable categories, and why validating
+that judgment against a manual sample (rather than trusting it blindly) matters. Working
+across both Python (for EDA/cleaning) and Power BI (for the interactive dashboard) also
+clarified where each tool is strongest: Python for repeatable, documented data preparation,
+and Power BI for fast, interactive exploration once the data is trustworthy.
 
 ## How to Reproduce
 ```bash
